@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+
+	<title>reveal.js – Blog estático con HTML y CSS</title>
+
+	<meta name="description" content="Blog estático con HTML y CSS">
+	<meta name="author" content="Angel Alvarez">
+
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="dist/reset.css">
+	<link rel="stylesheet" href="dist/reveal.css">
+	<link rel="stylesheet" href="dist/theme/black.css" id="theme">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="plugin/highlight/monokai.css">
+</head>
+
+<body>
+
+	<div class="reveal">
+
+		<!-- Any section element inside of this container is displayed as a slide -->
+		<div class="slides">
+			<section data-background="#4d7e65">
+				<h1>Blog estático con HTML y CSS</h1>
+				<p>
+					<small>Ángel Álvarez Rodríguez</small>
+				</p>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Funcionalidad</h2>
+				<p>
+					Se ha contruido un blog estatico con <strong>HTML</strong> y <strong>CSS</strong>. Dicho blog ofrece
+					informacion sobre las tareas realizadas en la asignatura Difusion de contenidos multimedia via web.
+				</p>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Layout</h2>
+				<p>
+					EL layout general esta configurado de tal forma que disponemos principalmente de tres elementos.
+				</p>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Header</h2>
+				<p>Ocupa todo el ancho de la página con un color de texto negro sobre un amarillo verdoso</p>
+				<pre><code data-line-numbers="4|10">
+.header {
+	width: 100%;
+	background-color: var(--amarilloVerdoso);
+	text-align: center;
+}
+
+@media (min-width: 768px) {
+	.header {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+}
+					</code></pre>
+			</section>
+			<section data-background="#4d7e65">
+				<h2>Main</h2>
+				<p>Esta compuesto de tres articulos, uno para cada ejercicio</p>
+				<pre><code data-line-numbers>
+<article class="entrada">
+	<picture class="entrada__imagen">
+		<img src="img/blog.png" alt="imagen blog"> 
+	</picture>
+	<article>
+		<h4>Blog estático - HTML y CSS</h4>
+		<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+		<a href="ejercicios/blog.html" class="boton boton--primario">Ver</a>
+	</article>
+</article>
+						</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Main</h2>
+				<p>Dispone de display flex a traves de la clase contenido-principal</p>
+				<pre><code data-line-numbers>
+.contenido-principal {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.entrada {
+	border-bottom: 1px solid var(--gris);
+	margin: 3rem;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+}
+
+@media (min-width: 768px) {
+	.entrada {
+		text-align: center;
+		display: flex;
+		flex-direction: row;
+	}
+}
+</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Footer</h2>
+				<p>Ocupa todo el ancho de la página con un color de texto negro sobre un amarillo verdoso</p>
+				<pre><code data-line-numbers>
+.footer {
+	text-align: center;
+	background-color: var(--amarilloVerdoso);
+	width: 100%;
+}
+</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Estandares W3C</h2>
+				<p>
+					Se ha seguido una estructura semántica en lo que respecta al blog. Validándose en el siguiente el siguiente enlace:
+				</p>
+				<a href="https://validator.w3.org"><img data-src="images/w3c.svg" alt="Enlace W3C"></a>
+			</section>
+
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>URL de despliegue</h2>
+				<a href="https://validator.w3.org">https://validator.w3.org</a>
+			</section>
+
+
+		</div>
+	</div>
+
+	<script src="dist/reveal.js"></script>
+	<script src="plugin/zoom/zoom.js"></script>
+	<script src="plugin/notes/notes.js"></script>
+	<script src="plugin/search/search.js"></script>
+	<script src="plugin/markdown/markdown.js"></script>
+	<script src="plugin/highlight/highlight.js"></script>
+	<script>
+
+		// Also available as an ES module, see:
+		// https://revealjs.com/initialization/
+		Reveal.initialize({
+			controls: true,
+			progress: true,
+			center: true,
+			hash: true,
+
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight]
+		});
+
+	</script>
+
+</body>
+
+</html>
