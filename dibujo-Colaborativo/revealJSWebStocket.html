@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+
+	<title>reveal.js – Blog estático con HTML y CSS</title>
+
+	<meta name="description" content="Blog estático con HTML y CSS">
+	<meta name="author" content="Angel Alvarez">
+
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="dist/reset.css">
+	<link rel="stylesheet" href="dist/reveal.css">
+	<link rel="stylesheet" href="dist/theme/black.css" id="theme">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="plugin/highlight/monokai.css">
+</head>
+
+<body>
+
+	<div class="reveal">
+
+		<!-- Any section element inside of this container is displayed as a slide -->
+		<div class="slides">
+			<section data-background="#4d7e65">
+				<h1>Dibujo Colaborativo</h1>
+				<p>
+					<small>Ángel Álvarez Rodríguez</small>
+				</p>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Funcionalidad</h2>
+				<p>
+					Se ha construido una aplicación utilizando WebSocket. Esta aplicación dispone de un canvas que permite a los usuarios realizar dibujos colaborativos.
+				</p>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Principales Características</h2>
+				<p>
+					El cliente dispone únicamente de un canvas, a través de Fabric.js podemos crear formas.
+				</p>
+				<img src="images/dibujo.png" alt="imagen app"> 
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Client</h2>
+				<p>El cliente permite crear objetos de características aleatorias</p>
+				<pre><code data-line-numbers="">
+function randomNumber() {
+	return Math.random() * 250;
+}
+
+function randomColor() {
+	const colores = ["blue", "green", "red", "black", "gray", "yellow"];
+	const index = Math.round(Math.random() * (colores.length - 1));
+	return colores[index];
+}
+
+function getUniqueID(){
+	function s4() {
+		return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+	}
+	return s4() + s4() + '-' + s4();
+};
+					</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Client</h2>
+				<p>La aplicacion Client envia como dato al servidor el ultimo objeto creado</p>
+				<pre><code data-line-numbers="12">
+function sendObject() {
+	//No se puede mandar todo el canvas solo el objeto en cuestion 
+	var listObjects = canvas.getObjects();
+
+	var lastObject = listObjects[listObjects.length - 1];
+
+	//Lo convertimos en un objeto genérico para agregarle el id
+	var objGenerico = JSON.parse(JSON.stringify(lastObject));
+	objGenerico.id = lastObject.id;
+	console.log("objGenerico" + JSON.stringify(objGenerico));
+	websocket.send(JSON.stringify(objGenerico));
+}
+					</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Client</h2>
+				<p>Si se arrastra uno de los objetos, también se envía para ser modificado en el servidor</p>
+				<pre><code data-line-numbers="2|8|17">
+window.addEventListener("load", function (event) {
+	var isObjectMoving = false;
+	canvas.on('object:moving', function (event) {
+		isObjectMoving = true;
+	});
+
+	canvas.on('mouse:up', function (event) {
+		if (isObjectMoving) {
+			isObjectMoving = false;
+
+			//Lo convertimos en un objeto generico para agregarle el id
+			var objGenerico = JSON.parse(JSON.stringify(event.target));
+			objGenerico.id = event.target.id;
+
+			console.log("objGenerico" + JSON.stringify(objGenerico));
+			websocket.send(JSON.stringify(objGenerico));
+		}
+	});
+});
+					</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Client</h2>
+				<p>Para identificar los objetos y poder distinguir si se ha creado o se ha movido, les asignamos un Id en el momento de su creación</p>
+				<pre><code data-line-numbers="">
+var objGenerico = JSON.parse(JSON.stringify(lastObject));
+objGenerico.id = lastObject.id;
+					</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Servidor</h2>
+				<p>Recibe la informacion del objeto y lo almacena</p>
+				<pre><code data-line-numbers="2|9-19">
+ws.on('message', function incoming(message) {
+	if (isJson(message)) {
+		var obj = JSON.parse(message);
+		
+		console.log('obj: %s', JSON.stringify(obj));
+
+		//Cuando movemos enviamos todo el canvas de nuevo
+		if (elementos.objects.filter(function(e) { return e.id === obj.id; }).length > 0) {
+			elementIndex = elementos.objects.findIndex((elemento => elemento.id == obj.id));
+			elementos.objects[elementIndex] = obj;
+
+			wss.broadcast(message, this);
+		}else{
+			elementos.objects.push(obj)
+
+			wss.broadcast(message, this);
+			console.log('broadcasting data');
+		}
+	}
+	console.log('received: %s', message);
+});
+					</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Servidor</h2>
+				<p>También se encarga de la gestión de los clientes, asignándoles un ID único</p>
+				<pre><code data-line-numbers="">
+wss.getUniqueID = function () {
+	function s4() {
+		return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+	}
+	return s4() + s4() + '-' + s4();
+};			
+					</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>Servidor</h2>
+				<p>La parte servidora almacena en un array los objetos enviados por el cliente, así como los Id de los clientes conectados</p>
+				<pre><code data-line-numbers="">
+//array para almacenar las figuras 
+var elementos = { "objects": [] , "clientsId":[]};	
+					</code></pre>
+			</section>
+
+			<section data-background="#4d7e65">
+				<h2>FIN</h2>
+			</section>
+
+
+		</div>
+	</div>
+
+	<script src="dist/reveal.js"></script>
+	<script src="plugin/zoom/zoom.js"></script>
+	<script src="plugin/notes/notes.js"></script>
+	<script src="plugin/search/search.js"></script>
+	<script src="plugin/markdown/markdown.js"></script>
+	<script src="plugin/highlight/highlight.js"></script>
+	<script>
+
+		// Also available as an ES module, see:
+		// https://revealjs.com/initialization/
+		Reveal.initialize({
+			controls: true,
+			progress: true,
+			center: true,
+			hash: true,
+
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight]
+		});
+
+	</script>
+
+</body>
+
+</html>
